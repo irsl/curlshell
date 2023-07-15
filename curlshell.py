@@ -168,7 +168,11 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _send_chunk(self, data):
         if type(data) == str:
-            data = data.encode()
+            try:
+                data = data.encode()
+            except UnicodeEncodeError:
+                eprint("Invalid unicode character in the input, chunk not sent")
+                return
         full_packet = '{:X}\r\n'.format(len(data)).encode()
         full_packet += data
         full_packet += b"\r\n"
