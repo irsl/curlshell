@@ -202,6 +202,6 @@ if __name__ == "__main__":
     parser.add_argument("--certificate", help="path to the certificate for TLS")
     parser.add_argument("--listen-host", default="0.0.0.0", help="host to listen on")
     parser.add_argument("--listen-port", type=int, default=443, help="port to listen on")
-    parser.add_argument("--serve-forever", type=bool, default=False, action='store_true', help="whether the server should exit after processing a session (just like nc would)")
-    parser.add_argument("--dependabot-workaround", type=bool, action='store_true', default=False, help="transfer-encoding support in the dependabot proxy is broken, it rewraps the raw chunks. This is a workaround.")
+    parser.add_argument("--serve-forever", default=False, action='store_true', help="whether the server should exit after processing a session (just like nc would)")
+    parser.add_argument("--dependabot-workaround", action='store_true', default=False, help="transfer-encoding support in the dependabot proxy is broken, it rewraps the raw chunks. This is a workaround.")
     do_the_job(parser.parse_args())
