@@ -1,6 +1,6 @@
 # Reverse shell using curl
 
-(Cloned from [https://github.com/irsl/curlshell](https://github.com/irsl/curlshell))
+(Cloned from [https://github.com/irsl/curlshell](https://github.com/irsl/curlshell); slightly enhanced)
 
 A reverse TCP shell through a proxy (using cURL).
 
