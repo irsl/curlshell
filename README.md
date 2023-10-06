@@ -4,6 +4,8 @@
 
 A reverse TCP shell through a proxy (using cURL).
 
+It allows an attacker to access a remote shell (bash) when the remote system can only access the Internet via a Proxy (and no other binaries can be installed or executed). It only needs `curl` and `bash`.
+
 Generate a SSL Certificate:
 ```sh
 openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/CN=THC"
