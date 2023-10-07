@@ -106,7 +106,7 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         locker(w, 1, not self.server.args.serve_forever)
         eprint(w, "stream connected")
         eprint('\x1b[0;35mTHC says: pimp up your prompt: Cut & Paste the following into your remote shell:\x1b[0m')
-        eprint('\x1b[0;36mcommand -v script >/dev/null && exec script -qc "${SHELL:-bash} -il" /dev/null\x1b[0m')
+        eprint('\x1b[0;36mcommand -v script >/dev/null && exec script -qc "/usr/bin/env bash -il" /dev/null\x1b[0m')
         eprint('\x1b[0;36mexport TERM=xterm-256color\x1b[0m')
         eprint("\x1b[0;36mPS1='{THC} \[\\033[36m\]\\u\[\\033[m\]@\[\\033[32m\]\\h:\[\\033[33;1m\]\\w \[\\e[0;31m\]\\$\[\\e[m\] '\x1b[0m")
         eprint("\x1b[0;36mreset\x1b[0m")
