@@ -4,7 +4,7 @@
 
 An encrypted reverse TCP shell through a proxy (using only cURL).
 
-It allows an attacker to access a remote shell (sh) when the remote system can access the Internet via a Proxy only (and no other binaries can be installed or executed). It only needs `curl` and `sh`. The target does not need to have python.
+It allows an attacker to access a remote shell (sh) when the remote system can access the Internet via a Proxy only (or the filesystem is mounted read-only/noexec). The target only needs to have `curl` and `sh` installed. Python is not needed and no additonal tools are installed or deployed.
 
 
 Generate a SSL Certificate (on your system; not the target):
