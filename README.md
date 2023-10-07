@@ -7,7 +7,7 @@ A reverse TCP shell through a proxy (using only cURL).
 It allows an attacker to access a remote shell (sh) when the remote system can access the Internet via a Proxy only (and no other binaries can be installed or executed). It only needs `curl` and `sh`. The target does not need to have python.
 
 
-Generate a SSL Certificate:
+Generate a SSL Certificate (on your system; not the target):
 ```sh
 openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/CN=THC"
 ```
