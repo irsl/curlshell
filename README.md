@@ -2,7 +2,7 @@
 
 (Cloned from [https://github.com/irsl/curlshell](https://github.com/irsl/curlshell); slightly enhanced)
 
-A reverse TCP shell through a proxy (using only cURL).
+An encrypted reverse TCP shell through a proxy (using only cURL).
 
 It allows an attacker to access a remote shell (sh) when the remote system can access the Internet via a Proxy only (and no other binaries can be installed or executed). It only needs `curl` and `sh`. The target does not need to have python.
 
