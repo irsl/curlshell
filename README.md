@@ -72,3 +72,5 @@ This command starts two cURL processes and connects another shell's input and ou
 
 ---
 More at https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet.
+
+Join us on Telegram: https://t.me/thcorg
